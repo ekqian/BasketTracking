@@ -45,15 +45,16 @@ if __name__ == '__main__':
     # 15m vertical lines
 
     # loading already computed panoramas
+    video_path = "resources/Short4Mosaicing.mp4"
     if os.path.exists('resources/pano.png'):
         pano = cv2.imread("resources/pano.png")
     else:
-        central_frame = 36
-        frames = get_frames('resources/Short4Mosaicing.mp4', central_frame, mod=3)
+        central_frame = 18
+        frames = get_frames(video_path, central_frame, mod=6)
         frames_flipped = [cv2.flip(frames[i], 1) for i in range(central_frame)]
         current_mosaic1 = collage(frames[central_frame:], direction=1)
         current_mosaic2 = collage(frames_flipped, direction=-1)
-        pano = collage([cv2.flip(current_mosaic2, 1)[:, :-10], current_mosaic1])
+        pano = collage([cv2.flip(current_mosaic2, 1), current_mosaic1])
 
         cv2.imwrite("resources/pano.png", pano)
 
@@ -67,11 +68,12 @@ if __name__ == '__main__':
             pano_enhanced = add_frame(frame, pano, pano_enhanced, plot=False)
         cv2.imwrite("resources/pano_enhanced.png", pano_enhanced)
 
+
     ###################################
     pano_enhanced = np.vstack((pano_enhanced,
                                np.zeros((100, pano_enhanced.shape[1], pano_enhanced.shape[2]), dtype=pano.dtype)))
-    img = binarize_erode_dilate(pano_enhanced, plot=False)
-    simplified_court, corners = (rectangularize_court(img, plot=False))
+    img = binarize_erode_dilate(pano_enhanced, plot=True)
+    simplified_court, corners = (rectangularize_court(img, plot=True))
     simplified_court = 255 - np.uint8(simplified_court)
 
     plt_plot(simplified_court, "Corner Detection", cmap="gray", additional_points=corners)
@@ -85,7 +87,7 @@ if __name__ == '__main__':
     resized = cv2.resize(rectified, (map.shape[1], map.shape[0]))
     map = cv2.resize(map, (rectified.shape[1], rectified.shape[0]))
 
-    video = cv2.VideoCapture("resources/Short4Mosaicing.mp4")
+    video = cv2.VideoCapture(video_path)
 
     players = []
     for i in range(1, 6):

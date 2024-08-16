@@ -35,6 +35,7 @@ class FeetDetector:
         cfg_seg = get_cfg()
         cfg_seg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
         cfg_seg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7  # set threshold for this model
+        cfg_seg.MODEL.DEVICE = "cpu"
         cfg_seg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")
         self.predictor_seg = DefaultPredictor(cfg_seg)
         self.bbs = []
@@ -93,7 +94,8 @@ class FeetDetector:
         plt_plot(out.get_image()[:, :, ::-1])'''
 
         indexes_ppl = np.array(
-            [np.array(np.where(p == True)).T for p in ppl])
+            [np.array(np.where(p == True)).T for p in ppl],
+            dtype=object)
         # returns two np arrays per person, one for x one for y
 
         # calculate estimated position of players in the 2D map
@@ -167,6 +169,7 @@ class FeetDetector:
                     player.positions = {}
                     player.previous_bb = None
                     player.has_ball = False
+                    player.is_open = False
 
         map_2d_text = map_2d.copy()
         for p in self.players:
